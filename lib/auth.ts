@@ -11,11 +11,25 @@ const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ??
   "http://localhost:3000";
 
+const optionalOrigins = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  process.env.BETTER_AUTH_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+  ...(process.env.CORS_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
+
+const trustedOrigins = Array.from(
+  new Set([appUrl, ...optionalOrigins].filter(Boolean)),
+);
+
 export const auth = betterAuth({
   appName: "Mentorship Chat",
   baseURL: appUrl,
   secret: process.env.BETTER_AUTH_SECRET,
-  trustedOrigins: [appUrl],
+  trustedOrigins,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
