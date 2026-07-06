@@ -10,22 +10,52 @@ const publicRoutes = [
 
 const authApiPrefix = "/api/auth";
 
-const corsAllowedOrigins = new Set(
-  [
-    process.env.NEXT_PUBLIC_APP_URL,
-    process.env.BETTER_AUTH_URL,
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-    ...(process.env.CORS_ALLOWED_ORIGINS ?? "")
-      .split(",")
-      .map((origin) => origin.trim())
-      .filter(Boolean),
-  ].filter(Boolean),
-);
+const corsAllowedOriginPatterns = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  process.env.BETTER_AUTH_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+  process.env.VERCEL_BRANCH_URL
+    ? `https://${process.env.VERCEL_BRANCH_URL}`
+    : undefined,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : undefined,
+  process.env.VERCEL ? "https://*.vercel.app" : undefined,
+  ...(process.env.CORS_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+].filter((origin): origin is string => Boolean(origin));
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function originMatchesPattern(origin: string, pattern: string) {
+  if (!pattern.includes("*")) {
+    return origin === pattern;
+  }
+
+  const regex = new RegExp(
+    `^${pattern
+      .split("*")
+      .map((part) => escapeRegex(part))
+      .join(".*")}$`,
+  );
+
+  return regex.test(origin);
+}
+
+function isAllowedOrigin(origin: string) {
+  return corsAllowedOriginPatterns.some((pattern) =>
+    originMatchesPattern(origin, pattern),
+  );
+}
 
 function applyCorsHeaders(request: NextRequest, response: NextResponse) {
   const origin = request.headers.get("origin");
 
-  if (!origin || !corsAllowedOrigins.has(origin)) {
+  if (!origin || !isAllowedOrigin(origin)) {
     return;
   }
 
