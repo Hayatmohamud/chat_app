@@ -39,7 +39,9 @@ export default function SignInPage() {
       });
 
       if (result.error) {
-        setError(getAuthErrorMessage(result.error, "Invalid email or password"));
+        setError(
+          getAuthErrorMessage(result.error, "Invalid email or password"),
+        );
         return;
       }
 
@@ -61,8 +63,7 @@ export default function SignInPage() {
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="font-semibold transition-colors hover:opacity-80"
-            style={{ color: "var(--accent)" }}
+            className="font-semibold text-(--accent) transition-colors hover:opacity-80"
           >
             Create one
           </Link>
@@ -95,21 +96,19 @@ export default function SignInPage() {
         />
 
         <div className="flex items-center justify-between text-sm">
-          <label className="flex cursor-pointer items-center gap-2 text-[var(--text-secondary)]">
+          <label className="flex cursor-pointer items-center gap-2 text-(--text-secondary)">
             <input
               type="checkbox"
               id="remember-me"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded"
-              style={{ accentColor: "var(--accent)" }}
+              className="h-4 w-4 rounded accent-(--accent)"
             />
             Remember me
           </label>
           <Link
             href="/forgot-password"
-            className="font-medium transition-colors"
-            style={{ color: "var(--accent)" }}
+            className="font-medium text-(--accent) transition-colors"
           >
             Forgot password?
           </Link>

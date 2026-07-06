@@ -18,11 +18,15 @@ const optionalOrigins = [
   ...(process.env.CORS_ALLOWED_ORIGINS ?? "")
     .split(",")
     .map((origin) => origin.trim())
-    .filter(Boolean),
-];
+    .filter((origin): origin is string => origin.length > 0),
+].filter((origin): origin is string => Boolean(origin));
 
 const trustedOrigins = Array.from(
-  new Set([appUrl, ...optionalOrigins].filter(Boolean)),
+  new Set(
+    [appUrl, ...optionalOrigins].filter((origin): origin is string =>
+      Boolean(origin),
+    ),
+  ),
 );
 
 export const auth = betterAuth({
